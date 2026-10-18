@@ -36,7 +36,7 @@ svg { flex-shrink: 0; }
 .skip-link:focus { top: 12px; }
 .site-header { max-width: 1600px; margin: auto; min-height: 94px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 0 4.5%; border-bottom: 1px solid var(--rule); }
 .brand { display: flex; gap: 11px; align-items: center; }
-.brand-icon { display: inline-flex; width: 36px; height: 40px; align-items: center; justify-content: center; color: var(--ink); border: 1px solid var(--ink); }
+.brand-icon { display: block; width: 40px; height: 40px; flex-shrink: 0; object-fit: contain; }
 .brand-name { font-family: var(--serif); font-size: 23px; letter-spacing: -.6px; line-height: 1.2; }
 .brand-name small { display: block; font-family: "Helvetica Neue", -apple-system, sans-serif; font-size: 10px; letter-spacing: .03em; margin-top: 5px; color: var(--muted); }
 .brand-tag { align-self: flex-start; font: 9px var(--mono); color: var(--muted); margin-top: 3px; }

@@ -6,7 +6,6 @@ import {
   ArrowUp,
   ArrowUpRight,
   ArrowRight,
-  Monitor,
   FileText,
   Plus,
   ShieldCheck,
@@ -245,9 +244,7 @@ function App() {
       <a className="skip-link" href="#main-content" onClick={e => { e.preventDefault(); document.getElementById("main-content")?.focus(); }}>본문으로 이동</a>
       <header className="site-header">
         <a href="#home" className="brand">
-          <span className="brand-icon">
-            <Monitor size={19} />
-          </span>
+          <img className="brand-icon" src={`${import.meta.env.BASE_URL}shopping-assistant-icon.png`} width="40" height="40" alt="" />
           <span className="brand-name">Review Catalog<small>경험 기반 제품 카탈로그</small></span><span className="brand-tag">DEMO</span>
         </a>
         <nav aria-label="주 메뉴">
