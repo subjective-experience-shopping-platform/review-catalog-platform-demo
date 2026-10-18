@@ -1,0 +1,974 @@
+[
+  {
+    "type": "function",
+    "name": "get_search_guide",
+    "description": "카테고리·동적 필터 키/연산자·관측값과 답변 정책을 확인한다.",
+    "parameters": {
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        }
+      },
+      "title": "get_search_guideArguments",
+      "type": "object"
+    },
+    "strict": false
+  },
+  {
+    "type": "function",
+    "name": "search_products",
+    "description": "전체 조건을 받아 객관·판매·리뷰로 필터하고 정렬한다. applied_filters_markdown을 답변 앞에 그대로 표시한다.",
+    "parameters": {
+      "$defs": {
+        "ExperienceCondition": {
+          "additionalProperties": false,
+          "properties": {
+            "condition_id": {
+              "minLength": 1,
+              "title": "Condition Id",
+              "type": "string"
+            },
+            "aspect_variant_ids": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "title": "Aspect Variant Ids",
+              "type": "array"
+            },
+            "desired_state_variant_ids": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Desired State Variant Ids"
+            },
+            "contrary_state_variant_ids": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Contrary State Variant Ids",
+              "type": "array"
+            },
+            "sentiments": {
+              "anyOf": [
+                {
+                  "items": {
+                    "enum": [
+                      "positive",
+                      "negative",
+                      "mixed",
+                      "neutral",
+                      "unknown"
+                    ],
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Sentiments"
+            },
+            "min_matching_reviews": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Min Matching Reviews",
+              "type": "integer"
+            },
+            "max_contrary_reviews": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Max Contrary Reviews"
+            }
+          },
+          "required": [
+            "condition_id",
+            "aspect_variant_ids"
+          ],
+          "title": "ExperienceCondition",
+          "type": "object"
+        },
+        "ExperienceTopic": {
+          "additionalProperties": false,
+          "properties": {
+            "topic_id": {
+              "minLength": 1,
+              "title": "Topic Id",
+              "type": "string"
+            },
+            "aspect_variant_ids": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "title": "Aspect Variant Ids",
+              "type": "array"
+            },
+            "desired_state_variant_ids": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Desired State Variant Ids"
+            },
+            "contrary_state_variant_ids": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Contrary State Variant Ids",
+              "type": "array"
+            }
+          },
+          "required": [
+            "topic_id",
+            "aspect_variant_ids"
+          ],
+          "title": "ExperienceTopic",
+          "type": "object"
+        },
+        "ObjectiveFilter": {
+          "additionalProperties": false,
+          "properties": {
+            "key": {
+              "title": "Key",
+              "type": "string"
+            },
+            "op": {
+              "enum": [
+                "eq",
+                "ne",
+                "in",
+                "not_in",
+                "gte",
+                "lte",
+                "between",
+                "contains_any",
+                "contains_all",
+                "exists"
+              ],
+              "title": "Op",
+              "type": "string"
+            },
+            "value": {
+              "default": null,
+              "title": "Value"
+            }
+          },
+          "required": [
+            "key",
+            "op"
+          ],
+          "title": "ObjectiveFilter",
+          "type": "object"
+        },
+        "OfferFilter": {
+          "additionalProperties": false,
+          "properties": {
+            "max_price": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Max Price"
+            },
+            "min_price": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Min Price"
+            },
+            "currency": {
+              "default": "KRW",
+              "pattern": "^[A-Z]{3}$",
+              "title": "Currency",
+              "type": "string"
+            },
+            "availability": {
+              "anyOf": [
+                {
+                  "items": {
+                    "enum": [
+                      "available",
+                      "sold_out",
+                      "discontinued",
+                      "unknown"
+                    ],
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Availability"
+            },
+            "max_shipping_fee": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Max Shipping Fee"
+            },
+            "max_shipping_days": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Max Shipping Days"
+            },
+            "retailers": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Retailers"
+            }
+          },
+          "title": "OfferFilter",
+          "type": "object"
+        },
+        "SortSpec": {
+          "additionalProperties": false,
+          "properties": {
+            "by": {
+              "default": "price",
+              "enum": [
+                "price",
+                "attribute",
+                "experience"
+              ],
+              "title": "By",
+              "type": "string"
+            },
+            "key": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Key"
+            },
+            "aspect_variant_ids": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Aspect Variant Ids"
+            },
+            "metric": {
+              "default": "positive_wilson_lower",
+              "enum": [
+                "positive_wilson_lower",
+                "state_wilson_lower"
+              ],
+              "title": "Metric",
+              "type": "string"
+            },
+            "desired_state_variant_ids": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Desired State Variant Ids"
+            },
+            "order": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "asc",
+                    "desc"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Order"
+            }
+          },
+          "title": "SortSpec",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        },
+        "filters": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ObjectiveFilter"
+          },
+          "title": "Filters",
+          "type": "array"
+        },
+        "offer_filter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OfferFilter"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "experience_conditions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ExperienceCondition"
+          },
+          "title": "Experience Conditions",
+          "type": "array"
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SortSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence_topics": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ExperienceTopic"
+          },
+          "title": "Evidence Topics",
+          "type": "array"
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Limit"
+        },
+        "user_request": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "User Request"
+        },
+        "interpretation_notes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Interpretation Notes",
+          "type": "array"
+        }
+      },
+      "title": "search_productsArguments",
+      "type": "object"
+    },
+    "strict": false
+  },
+  {
+    "type": "function",
+    "name": "compare_products",
+    "description": "같은 카테고리의 2~5개 상품을 객관 속성·판매 요약·체감 토픽으로 비교한다.",
+    "parameters": {
+      "$defs": {
+        "ExperienceTopic": {
+          "additionalProperties": false,
+          "properties": {
+            "topic_id": {
+              "minLength": 1,
+              "title": "Topic Id",
+              "type": "string"
+            },
+            "aspect_variant_ids": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "title": "Aspect Variant Ids",
+              "type": "array"
+            },
+            "desired_state_variant_ids": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Desired State Variant Ids"
+            },
+            "contrary_state_variant_ids": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Contrary State Variant Ids",
+              "type": "array"
+            }
+          },
+          "required": [
+            "topic_id",
+            "aspect_variant_ids"
+          ],
+          "title": "ExperienceTopic",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "product_ids": {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 5,
+          "minItems": 2,
+          "title": "Product Ids",
+          "type": "array"
+        },
+        "attribute_keys": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribute Keys"
+        },
+        "experience_topics": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ExperienceTopic"
+          },
+          "title": "Experience Topics",
+          "type": "array"
+        }
+      },
+      "required": [
+        "product_ids"
+      ],
+      "title": "compare_productsArguments",
+      "type": "object"
+    },
+    "strict": false
+  },
+  {
+    "type": "function",
+    "name": "get_product_details",
+    "description": "상품의 전체 객관 속성·상세 Markdown·판매처·주요 리뷰 속성을 반환한다.",
+    "parameters": {
+      "$defs": {
+        "ExperienceTopic": {
+          "additionalProperties": false,
+          "properties": {
+            "topic_id": {
+              "minLength": 1,
+              "title": "Topic Id",
+              "type": "string"
+            },
+            "aspect_variant_ids": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "title": "Aspect Variant Ids",
+              "type": "array"
+            },
+            "desired_state_variant_ids": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Desired State Variant Ids"
+            },
+            "contrary_state_variant_ids": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Contrary State Variant Ids",
+              "type": "array"
+            }
+          },
+          "required": [
+            "topic_id",
+            "aspect_variant_ids"
+          ],
+          "title": "ExperienceTopic",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "product_id": {
+          "title": "Product Id",
+          "type": "integer"
+        },
+        "experience_topics": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ExperienceTopic"
+          },
+          "title": "Experience Topics",
+          "type": "array"
+        }
+      },
+      "required": [
+        "product_id"
+      ],
+      "title": "get_product_detailsArguments",
+      "type": "object"
+    },
+    "strict": false
+  },
+  {
+    "type": "function",
+    "name": "search_product_docs",
+    "description": "상세 문서에서 공백/쉼표로 나눈 키워드가 있는 줄과 가장 가까운 앞 제목을 찾는다.",
+    "parameters": {
+      "properties": {
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "product_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Ids"
+        },
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        },
+        "max_results": {
+          "default": 15,
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Max Results",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "title": "search_product_docsArguments",
+      "type": "object"
+    },
+    "strict": false
+  },
+  {
+    "type": "function",
+    "name": "find_review_attributes",
+    "description": "리뷰 속성 표현을 문자 검색한다. matched_selector와 cluster_selector를 보고 범위를 직접 선택한다.",
+    "parameters": {
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        },
+        "query": {
+          "default": "",
+          "title": "Query",
+          "type": "string"
+        },
+        "limit": {
+          "default": 20,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        }
+      },
+      "title": "find_review_attributesArguments",
+      "type": "object"
+    },
+    "strict": false
+  },
+  {
+    "type": "function",
+    "name": "list_review_states",
+    "description": "선택한 원래 aspect 표현의 상태 ID·리뷰 수·감성 분포·예시를 조회한다.",
+    "parameters": {
+      "properties": {
+        "aspect_variant_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Aspect Variant Ids",
+          "type": "array"
+        },
+        "product_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Ids"
+        },
+        "query": {
+          "default": "",
+          "title": "Query",
+          "type": "string"
+        },
+        "limit": {
+          "default": 30,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "aspect_variant_ids"
+      ],
+      "title": "list_review_statesArguments",
+      "type": "object"
+    },
+    "strict": false
+  },
+  {
+    "type": "function",
+    "name": "get_review_evidence",
+    "description": "일치·상반·기타·상태 미기재 리뷰의 원문 근거를 확인한다. 한 리뷰에 여러 라벨을 허용한다.",
+    "parameters": {
+      "properties": {
+        "aspect_variant_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Aspect Variant Ids",
+          "type": "array"
+        },
+        "desired_state_variant_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Desired State Variant Ids"
+        },
+        "contrary_state_variant_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Contrary State Variant Ids",
+          "type": "array"
+        },
+        "product_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Ids"
+        },
+        "sentiments": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  "positive",
+                  "negative",
+                  "mixed",
+                  "neutral",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sentiments"
+        },
+        "group": {
+          "default": "all",
+          "enum": [
+            "all",
+            "matching",
+            "contrary",
+            "other",
+            "unknown_state"
+          ],
+          "title": "Group",
+          "type": "string"
+        },
+        "include_full_review": {
+          "default": false,
+          "title": "Include Full Review",
+          "type": "boolean"
+        },
+        "limit": {
+          "default": 10,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "aspect_variant_ids"
+      ],
+      "title": "get_review_evidenceArguments",
+      "type": "object"
+    },
+    "strict": false
+  },
+  {
+    "type": "function",
+    "name": "get_offers",
+    "description": "판매처별 가격·배송·재고·확인 시각을 반환한다. 판매 정보는 확인 시점의 스냅샷이다.",
+    "parameters": {
+      "properties": {
+        "product_ids": {
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Product Ids",
+          "type": "array"
+        },
+        "availability": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  "available",
+                  "sold_out",
+                  "discontinued",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Availability"
+        }
+      },
+      "required": [
+        "product_ids"
+      ],
+      "title": "get_offersArguments",
+      "type": "object"
+    },
+    "strict": false
+  }
+]
