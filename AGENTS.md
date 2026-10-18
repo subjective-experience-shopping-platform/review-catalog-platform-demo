@@ -105,7 +105,7 @@ get_review_evidence, get_offers
 - 채팅은 `previous_response_id` 연결을 위해 OpenAI `store=True`, 리뷰 추출은 `store=False`다. 앱의 새 대화는 OpenAI 저장 데이터나 S3 기록을 삭제하지 않는다. 모델·도구 결과·상세 문서·사용자 리뷰는 데이터이며 시스템 지침을 대체하지 않는다.
 - 현재 모델 기본값은 추출 `gpt-6-luna` / `high`, 채팅 `gpt-6.1-sol` / `medium`이다. 로컬은 `.env.example`과 `agent.py`, 배포는 `infra/template.py`, 기록의 모델명은 `audit.py`도 함께 확인한다. `.env` 모델 설정이 배포 템플릿에 자동 반영된다고 가정하지 않는다. 키·모델 오류 때 다른 모델로 자동 전환하거나 가짜 AI 답변을 반환하지 않는다.
 - 모델 루프는 턴당 최대 10회, 도구 호출 최대 16회, 루프의 경과 시간 검사 210초다. OpenAI 클라이언트는 timeout 90초·자동 재시도 0회다. 비용·시간 제한을 무한 재시도로 우회하지 않는다.
-- UI는 `#home`, `#chat`, `#report`의 hash 라우팅과 Pages 하위 경로를 사용한다. 한 대화의 메시지·조건·세션과 리뷰·보고서는 React 메모리에만 둔다. localStorage·sessionStorage·IndexedDB에 저장하지 않는다.
+- UI는 `#home`, `#chat`, `#report`의 hash 라우팅과 Pages 하위 경로를 사용한다. 홈은 `frontend/src/ReadmeHome.tsx`에서 네 개 GitHub README를 표시하며 `#home/experiment`, `#home/search`, `#home/platform`과 `?section=` 문서 앵커를 지원한다. `readme.ts`의 내부 링크 판정과 `readme.css`의 본문 스타일은 홈에 한정한다. HTML은 정제하고, 같은 데모 URL은 현재 탭의 hash 이동으로 처리하여 메모리 상태를 유지한다. 한 대화의 메시지·조건·세션과 리뷰·보고서는 React 메모리에만 둔다. localStorage·sessionStorage·IndexedDB에 저장하지 않는다.
 - 새 대화는 확인 후 메시지·조건·응답 ID·continuation·진행 상태를 초기화한다. `AbortController`와 `epoch`로 이전 요청의 늦은 결과가 새 대화에 들어오지 않게 한다. 브라우저 중단을 서버 처리 취소나 기록 삭제로 해석하지 않는다.
 - UI 수정 시 데이터 출처 안내, 카탈로그 로딩/실패, 키 미준비, 빈 대화, 처리 중 상태, 실패 후 입력 복원, 적용 조건, 새 대화 취소/확인, 보고서 생성·다운로드를 보존한다. IME 조합 중 Enter 전송 방지, Shift+Enter, 키보드 포커스, dialog, reduced-motion, 모바일 가독성을 확인한다.
 - 현재 화면은 종이색·절제된 색상·타이포그래피·모니터 관찰 노트 중심이다. 스타일은 `styles.css`, SVG 아이콘은 `icons.tsx`에서 관리한다. 디자인 변경도 API·세션·오류·빈 상태 계약을 유지해야 한다.

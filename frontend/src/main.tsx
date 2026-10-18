@@ -29,6 +29,9 @@ import {
   type ReportResult,
 } from "./api";
 import "./styles.css";
+import { appPage } from "./readme";
+
+const ReadmeHome = React.lazy(() => import("./ReadmeHome").then(module => ({ default: module.ReadmeHome })));
 
 type Message = {
   role: "user" | "assistant";
@@ -40,7 +43,6 @@ const examples = [
   "빛샘이 적다는 리뷰가 있는 모니터를 비교해줘",
   "30만 원 이하에 무료배송인 판매처가 있는 모니터를 찾아줘",
 ];
-const money = (n: number) => n.toLocaleString("ko-KR");
 function Markdown({ text }: { text: string }) {
   return (
     <div className="prose">
@@ -66,7 +68,7 @@ function Conditions({ items }: { items: Condition[] }) {
 }
 
 function App() {
-  const [page, setPage] = useState(location.hash.slice(1) || "home"),
+  const [page, setPage] = useState(() => appPage(location.hash)),
     [data, setData] = useState<Catalog | null>(null),
     [loadError, setLoadError] = useState("");
   const [messages, setMessages] = useState<Message[]>([]),
@@ -96,7 +98,7 @@ function App() {
     else if (page === "chat" && noticeAccepted) textarea.current?.focus();
   }, [page, noticeAccepted]);
   useEffect(() => {
-    const fn = () => setPage(location.hash.slice(1) || "home");
+    const fn = () => setPage(appPage(location.hash));
     window.addEventListener("hashchange", fn);
     catalog()
       .then((d) => {
@@ -273,92 +275,15 @@ function App() {
           GitHub <ArrowUpRight size={15} />
         </a>
       </header>
-      {loadError && <div role="alert" className="global-notice error">{loadError}</div>}
-      {data && !data.api_ready && (
+      {page !== "home" && loadError && <div role="alert" className="global-notice error">{loadError}</div>}
+      {page !== "home" && data && !data.api_ready && (
         <div className="global-notice">
           <span className="dot amber" />
           API 연결 준비 중 · 카탈로그를 살펴볼 수 있으며, 채팅과 보고서 생성은
           API 키 등록 후 이용할 수 있습니다.
         </div>
       )}
-      {page === "home" && (
-        <main id="main-content" tabIndex={-1} className="home">
-          <div className="edition-line"><span>EXPERIENCE-DRIVEN PRODUCT CATALOG</span><span>모니터 편 / 01</span></div>
-          <div className="hero-grid">
-            <section className="hero-intro">
-              <div className="eyebrow">사양을 읽고, 경험을 비교하다</div>
-              <h1>좋은 모니터의 기준,<br /><span>당신의 경험에서.</span></h1>
-              <p className="hero-copy">크기와 해상도로 좁히고, 빛샘과 눈의 편안함까지 살펴보세요. 아홉 개 모니터의 사양과 실제 리뷰에서 선택의 근거를 찾습니다.</p>
-              <div className="hero-actions">
-                <a href="#chat" className="primary">모니터 비교 시작 <ArrowRight size={18} /></a>
-                <a href="#report" className="text-link">내 리뷰 분석하기 <ArrowUpRight size={16} /></a>
-              </div>
-              <p className="trust">조건에 맞는 상품이 없으면, 없다고 알려드립니다.</p>
-            </section>
-            <figure className="catalog-figure" aria-label="모니터의 사양과 사용 경험을 함께 살펴보는 개념도">
-              <div className="figure-index"><span>관찰 노트</span><span>FIG. 01</span></div>
-              <svg className="monitor-drawing" viewBox="0 0 480 270" aria-hidden="true">
-                <path className="drawing-guide" d="M30 40h420M30 218h420M66 15v225M410 15v225" />
-                <rect className="drawing-body" x="77" y="53" width="325" height="181" rx="3" />
-                <rect className="drawing-screen" x="88" y="64" width="303" height="157" />
-                <path className="drawing-grid" d="M88 116h303M88 169h303M189 64v157M290 64v157" />
-                <path className="drawing-diagonal" d="m97 211 285-138m-285 0 285 138" />
-                <path className="drawing-stand" d="M223 234v20l-37 9h107l-36-9v-20" />
-                <path className="drawing-guide" d="M77 33h325m-325-5v10m325-10v10" />
-                <circle cx="240" cy="228" r="2" fill="currentColor" />
-              </svg>
-              <figcaption>
-                <div><span className="note-number">01 / 사양</span><b>숫자로 확인하는 것</b><p>화면 크기 · 해상도 · 주사율</p></div>
-                <div><span className="note-number">02 / 경험</span><b>써 본 사람에게 묻는 것</b><p>빛샘 · 가독성 · 눈의 편안함</p></div>
-              </figcaption>
-              <p className="figure-footnote">사양은 조건으로, 리뷰는 판단의 근거로.</p>
-            </figure>
-          </div>
-          <section className="stats-strip" data-reveal>
-            <div>
-              <strong>
-                9<span>개</span>
-              </strong>
-              <p>비교 대상 모니터</p>
-            </div>
-            <div>
-              <strong>
-                {data ? money(data.metadata.counts.reviews) : "—"}
-                <span>개</span>
-              </strong>
-              <p>고정 카탈로그 리뷰</p>
-            </div>
-            <div>
-              <strong>
-                {data ? money(data.metadata.counts.opinion_units) : "—"}
-                <span>개</span>
-              </strong>
-              <p>추출된 사용 경험</p>
-            </div>
-            <div className="stat-description">
-              <p>
-                많은 상품을 나열하기보다,
-                <br />
-                <b>선택의 근거를 분명하게.</b>
-              </p>
-            </div>
-          </section>
-          <section className="explore" data-reveal>
-            <div className="section-heading"><div><div className="eyebrow">사용 안내</div><h2>고르기 전에도, 써 본 뒤에도.</h2></div><span>입력 내용은 고정 카탈로그에 반영하지 않습니다.</span></div>
-            <div className="feature-grid">
-              <a href="#chat" className="feature-card"><span className="feature-number">01</span><div><h3>다음 모니터를 고를 때</h3><p>원하는 사양과 사용 경험을 말하고,<br />적용된 조건에 따라 상품을 비교하세요.</p><span className="feature-action">쇼핑 Agent 열기 <ArrowUpRight size={16} /></span></div></a>
-              <a href="#report" className="feature-card"><span className="feature-number">02</span><div><h3>내 경험이 궁금할 때</h3><p>직접 쓴 리뷰를 기존 리뷰와 나란히 놓고,<br />같은 경험과 다른 평가를 확인하세요.</p><span className="feature-action">리뷰 보고서 만들기 <ArrowUpRight size={16} /></span></div></a>
-            </div>
-          </section>
-          <section className="scope-note" data-reveal>
-            <b>공개 포트폴리오 데모</b>
-            <p>
-              고정된 9개 모니터만 다룹니다. 판매처·가격·배송·재고·링크는 데모 가상 정보이며,
-              리뷰 근거는 제품의 성능이나 만족도를 보장하지 않습니다.
-            </p>
-          </section>
-        </main>
-      )}
+      {page === "home" && <React.Suspense fallback={<main id="main-content" tabIndex={-1} className="home" role="status">프로젝트 문서를 준비하고 있습니다.</main>}><ReadmeHome /></React.Suspense>}
       {page === "chat" && (
         <main id="main-content" tabIndex={-1} className="chat-layout">
           <aside className="chat-sidebar">
@@ -653,7 +578,7 @@ function App() {
           </button>
         </main>
       )}
-      {page !== "chat" && (
+      {page === "report" && (
         <footer>
           <span>Review Catalog</span>
           <p>객관적인 사양과 주관적인 경험 사이에서.</p>
