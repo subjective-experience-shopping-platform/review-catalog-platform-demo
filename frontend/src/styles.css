@@ -82,8 +82,6 @@ footer > span:last-child { font: 9px var(--mono); letter-spacing: .06em; }
 .sidebar-bottom details { margin-top: 12px; }
 .sidebar-bottom summary { cursor: pointer; display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--ink); }
 .chat-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: #fbfbfa; }
-.chat-topbar { display: flex; justify-content: space-between; align-items: center; padding: 21px 34px; border-bottom: 1px solid var(--rule); font: 10px var(--mono); color: var(--muted); }
-.chat-topbar > span:first-child { display: flex; align-items: center; gap: 10px; font-family: inherit; font-size: 12px; color: var(--ink); }
 .conversation { overflow: auto; flex: 1; padding: 28px max(32px, 7%); }
 .chat-empty { max-width: 660px; margin: 36px auto 24px; }
 .chat-empty h1 { font-family: var(--serif); font-size: 36px; margin: 20px 0 16px; }
@@ -119,7 +117,11 @@ textarea::placeholder { color: #77766f; opacity: 1; }
 .inline-error { padding: 14px 16px; border-radius: 4px; background: #fdebec; color: #9f2f2d; font-size: 13px; margin-top: 16px; }
 
 /* Report inputs and output share the language of a printed research note. */
-.report-page { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 72px; max-width: 1260px; padding: 65px 45px 90px; margin: auto; }
+.report-shell { display: flex; flex-direction: column; min-height: 100dvh; }
+.report-shell > .site-header { width: 100%; margin: 0 auto; flex-shrink: 0; }
+.report-shell > footer { flex-shrink: 0; }
+.report-page { display: grid; grid-template-columns: 300px minmax(0, 1fr); align-items: start; flex: 1; width: 100%; gap: 72px; max-width: 1260px; padding: 65px 45px 90px; margin: 0 auto; }
+.report-heading { position: sticky; top: 24px; max-height: calc(100dvh - 48px); overflow-y: auto; }
 .report-heading h1 { font-family: var(--serif); font-size: 39px; margin: 24px 0; }
 .report-heading > p { font-size: 14px; line-height: 1.9; color: var(--muted); }
 .report-policy { display: flex; gap: 12px; margin: 35px 0 20px; padding-top: 24px; border-top: 1px solid var(--rule); font-size: 11px; line-height: 1.9; color: var(--muted); }
@@ -211,7 +213,6 @@ textarea::placeholder { color: #77766f; opacity: 1; }
   .mobile-policy { display: block; }
   .sidebar-bottom summary { font-size: 11px; min-height: 35px; }
   .chat-main { flex: 1; }
-  .chat-topbar { padding: 16px 22px; }
   .conversation { padding: 20px 22px; overflow: visible; }
   .chat-empty { margin: 20px 0 25px; }
   .chat-empty h1 { font-size: 30px; }
@@ -221,6 +222,7 @@ textarea::placeholder { color: #77766f; opacity: 1; }
   .composer textarea { font-size: 16px; }
   .composer-wrap > p { font-size: 10px; }
   .report-page { grid-template-columns: 1fr; padding: 36px 22px 50px; gap: 28px; }
+  .report-heading { position: static; max-height: none; overflow: visible; }
   .report-heading h1 { font-size: 36px; }
   .report-policy { margin: 22px 0 12px; }
   .report-form, .report-result { padding: 24px 20px; }

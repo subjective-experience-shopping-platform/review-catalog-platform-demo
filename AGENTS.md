@@ -108,6 +108,7 @@ get_review_evidence, get_offers
 - UI는 `#home`, `#chat`, `#report`의 hash 라우팅과 Pages 하위 경로를 사용한다. 홈은 `frontend/src/ReadmeHome.tsx`에서 네 개 GitHub README를 표시하며 `#home/experiment`, `#home/search`, `#home/platform`과 `?section=` 문서 앵커를 지원한다. `readme.ts`의 내부 링크 판정과 `readme.css`의 본문 스타일은 홈에 한정한다. HTML은 정제하고, 같은 데모 URL은 현재 탭의 hash 이동으로 처리하여 메모리 상태를 유지한다. 한 대화의 메시지·조건·세션과 리뷰·보고서는 React 메모리에만 둔다. localStorage·sessionStorage·IndexedDB에 저장하지 않는다.
 - README 본문은 가용 너비를 사용하고 링크는 파란색으로 구분하며 제목 링크 끝에 이동 아이콘을 표시한다. GitHub 원문 링크는 본문 우측 상단의 `github-open-link.png` 아이콘으로 제공한다. Mermaid 코드 블록은 `ReadmeMermaid.tsx`에서 지연 로딩하고 strict 보안 설정으로 SVG를 렌더링하며, 실패하면 원문 코드를 표시한다. README 이미지는 주소 이동 없이 `ReadmeImagePreview.tsx`의 모달로 확대하고 이미지·배경 클릭 또는 Esc로 닫는다. 모달의 스크롤 잠금과 포커스 복원을 유지한다.
 - 새 대화는 확인 후 메시지·조건·응답 ID·continuation·진행 상태를 초기화한다. `AbortController`와 `epoch`로 이전 요청의 늦은 결과가 새 대화에 들어오지 않게 한다. 브라우저 중단을 서버 처리 취소나 기록 삭제로 해석하지 않는다.
+- 새 리뷰 작성은 동일한 형태의 확인 dialog를 거친 뒤 사용 경험·보고서·오류·진행 상태를 지우고 페이지 최상단으로 이동한다. 선택 상품은 유지한다. 진행 중 요청은 `AbortController`와 별도 `reportEpoch`로 중단·격리하여 초기화 후 늦은 응답이 화면을 복원하지 않게 한다. 리뷰 보고서의 footer는 짧은 화면에서도 뷰포트 하단에 두고, 좌측 안내는 데스크톱에서 sticky로 따라오며 모바일에서는 일반 흐름으로 둔다.
 - UI 수정 시 데이터 출처 안내, 카탈로그 로딩/실패, 키 미준비, 빈 대화, 처리 중 상태, 실패 후 입력 복원, 적용 조건, 새 대화 취소/확인, 보고서 생성·다운로드를 보존한다. IME 조합 중 Enter 전송 방지, Shift+Enter, 키보드 포커스, dialog, reduced-motion, 모바일 가독성을 확인한다.
 - 현재 화면은 종이색·절제된 색상·타이포그래피·모니터 관찰 노트 중심이다. 스타일은 `styles.css`, SVG 아이콘은 `icons.tsx`에서 관리한다. 디자인 변경도 API·세션·오류·빈 상태 계약을 유지해야 한다.
 

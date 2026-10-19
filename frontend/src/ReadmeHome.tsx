@@ -84,7 +84,7 @@ export function ReadmeHome() {
   return (
     <main id="main-content" tabIndex={-1} className="readme-home">
       <aside className="readme-index" aria-label="프로젝트 문서">
-        <h2>프로젝트 읽기</h2>
+        <h2>프로젝트 문서 목차</h2>
         <nav className="readme-chapters" aria-label="README 선택">
           {readmeChapters.map(item => (
             <a key={item.id} href={readmeHref(item)} aria-current={chapter.id === item.id ? "page" : undefined} onClick={selectChapter}>
@@ -93,7 +93,6 @@ export function ReadmeHome() {
             </a>
           ))}
         </nav>
-        <p className="readme-index-note">리뷰에서 출발해 실험과 검색,<br />카탈로그 운영까지.</p>
       </aside>
       <section className="readme-reader" aria-label={chapter.title}>
         <article ref={article} tabIndex={-1} className="readme-markdown" aria-label={`${chapter.title} README`} aria-busy={!markdown && !error}>

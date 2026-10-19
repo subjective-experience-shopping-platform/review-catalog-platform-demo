@@ -89,15 +89,20 @@ function App() {
     [report, setReport] = useState<ReportResult | null>(null),
     [reportBusy, setReportBusy] = useState(false),
     [reportStatus, setReportStatus] = useState(""),
-    [reportError, setReportError] = useState("");
+    [reportError, setReportError] = useState(""),
+    [reportResetOpen, setReportResetOpen] = useState(false);
   const controller = useRef<AbortController | null>(null),
     reportController = useRef<AbortController | null>(null),
     epoch = useRef(0),
+    reportEpoch = useRef(0),
     bottom = useRef<HTMLDivElement>(null),
     textarea = useRef<HTMLTextAreaElement>(null),
     notice = useRef<HTMLDialogElement>(null),
-    resetDialog = useRef<HTMLDialogElement>(null);
+    resetDialog = useRef<HTMLDialogElement>(null),
+    reportResetDialog = useRef<HTMLDialogElement>(null),
+    reviewTextarea = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { if (resetOpen) resetDialog.current?.showModal(); }, [resetOpen]);
+  useEffect(() => { if (reportResetOpen) reportResetDialog.current?.showModal(); }, [reportResetOpen]);
   useEffect(() => {
     if (page === "chat" && !noticeAccepted) notice.current?.showModal();
     else if (page === "chat" && noticeAccepted) textarea.current?.focus();
@@ -206,9 +211,24 @@ function App() {
       }
     }
   }
+  function resetReport() {
+    reportEpoch.current++;
+    reportController.current?.abort();
+    setReview("");
+    setReport(null);
+    setReportBusy(false);
+    setReportStatus("");
+    setReportError("");
+    setReportResetOpen(false);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+      reviewTextarea.current?.focus({ preventScroll: true });
+    });
+  }
   async function submitReport(e: React.FormEvent) {
     e.preventDefault();
     if (reportBusy) return;
+    const current = ++reportEpoch.current;
     const abort = new AbortController();
     reportController.current = abort;
     setReportBusy(true);
@@ -216,18 +236,22 @@ function App() {
     setReport(null);
     setReportStatus("보고서를 준비하고 있습니다.");
     try {
-      setReport(
-        await stream<ReportResult>(
-          "/report",
-          { product_id: product, review },
-          abort.signal,
-          setReportStatus,
-        ),
+      const result = await stream<ReportResult>(
+        "/report",
+        { product_id: product, review },
+        abort.signal,
+        (s) => { if (current === reportEpoch.current) setReportStatus(s); },
       );
+      if (current === reportEpoch.current) setReport(result);
     } catch (e) {
-      setReportError(e instanceof Error ? e.message : "보고서 생성 오류");
+      if (current === reportEpoch.current && !(e instanceof DOMException && e.name === "AbortError")) {
+        setReportError(e instanceof Error ? e.message : "보고서 생성 오류");
+      }
     } finally {
-      setReportBusy(false);
+      if (current === reportEpoch.current) {
+        setReportBusy(false);
+        setReportStatus("");
+      }
     }
   }
   function download() {
@@ -246,7 +270,7 @@ function App() {
     location.hash = p;
   };
   return (
-    <>
+    <div className={page === "report" ? "report-shell" : undefined}>
       <a className="skip-link" href="#main-content" onClick={e => { e.preventDefault(); document.getElementById("main-content")?.focus(); }}>본문으로 이동</a>
       <header className="site-header">
         <a href="#home" className="brand">
@@ -256,8 +280,8 @@ function App() {
         <nav aria-label="주 메뉴">
           {[
             ["home", "프로젝트"],
-            ["chat", "쇼핑 Agent"],
             ["report", "리뷰 보고서"],
+            ["chat", "쇼핑 Agent"],
           ].map(([id, label]) => (
             <a
               key={id}
@@ -336,13 +360,6 @@ function App() {
             </div>
           </aside>
           <section className="chat-main">
-            <div className="chat-topbar">
-              <span>
-                <span className="dot" />
-                모니터 쇼핑 Agent
-              </span>
-              <span>MONITORS / 09</span>
-            </div>
             <div className="conversation" aria-live="polite">
               {messages.length === 0 ? (
                 <div className="chat-empty">
@@ -448,11 +465,11 @@ function App() {
       {page === "report" && (
         <main id="main-content" tabIndex={-1} className="report-page">
           <section className="report-heading">
-            <div className="eyebrow">02 / 리뷰 보고서</div>
+            <div className="eyebrow">리뷰 보고서</div>
             <h1>
-              내 경험을,
+              내 리뷰를,
               <br />
-              리뷰와 나란히.
+              비교 가능한 속성으로.
             </h1>
             <p>
               속성 추출부터 기존 리뷰 비교, 상품 요약까지
@@ -462,14 +479,16 @@ function App() {
             <div className="report-policy">
               <ShieldCheck size={19} />
               <p>
-                입력 리뷰와 생성 보고서는 보안 점검을 위해 비공개 저장소에 보관하며 90일 후 자동 삭제 대상이 됩니다. 개인정보나 비밀번호를 입력하지 마세요.
+                리뷰 보고서는 기업 내부에서 고객 체감 정보를 분석하기 위해 생성하는 자료로, 일반 소비자에게는 공개되지 않습니다.
                 <br />
-                기존 표현과 정확히 일치한 의견만 비교합니다.
+                여기에는 리뷰 원문뿐만 아니라 쇼핑 Agent가 검색 시 참조하는 Raw Data에 가까운 상세 분석 결과가 포함됩니다.
+                <br />
+                LLM의 생성 방식 대신 분석 결과에 매핑된 사전 정의 표현으로 출력되므로, 쇼핑 Agent가 활용하는 meta-search MCP의 출력물을 보다 직관적으로 확인하는 목적으로 구성하였습니다.
               </p>
             </div>
-            <a className="text-link" href="#chat">
-              채팅 페이지로 이동 <ArrowUpRight size={16} />
-            </a>
+            <button className="secondary" onClick={() => setReportResetOpen(true)}>
+              <Plus size={16} />새 리뷰 작성하기
+            </button>
           </section>
           <div className="report-content">
             <form className="report-form" onSubmit={submitReport}>
@@ -498,6 +517,7 @@ function App() {
               </label>
               <textarea
                 id="review"
+                ref={reviewTextarea}
                 rows={7}
                 value={review}
                 onChange={(e) => setReview(e.target.value)}
@@ -612,7 +632,26 @@ function App() {
           </div>
         </dialog>
       )}
-    </>
+      {reportResetOpen && (
+        <dialog ref={reportResetDialog} className="modal" aria-labelledby="report-reset-title" onCancel={() => setReportResetOpen(false)}>
+          <RotateCcw size={25} />
+          <h2 id="report-reset-title">새 리뷰를 작성할까요?</h2>
+          <p>
+            작성한 사용 경험과 생성된 보고서가 지워져 복구할 수 없습니다.
+            진행 중인 보고서 요청은 화면에서 중단됩니다.
+            서버 보안 기록은 삭제되지 않으며 90일 보관 정책을 따릅니다.
+          </p>
+          <div>
+            <button className="secondary" onClick={() => setReportResetOpen(false)}>
+              취소
+            </button>
+            <button className="primary" onClick={resetReport} autoFocus>
+              지우고 시작
+            </button>
+          </div>
+        </dialog>
+      )}
+    </div>
   );
 }
 createRoot(document.getElementById("root")!).render(
