@@ -54,6 +54,16 @@
 .readme-markdown blockquote { margin: .75rem 0; padding: .125rem 0 .125rem 1rem; border-left: 3px solid var(--muted); color: var(--muted); }
 .readme-markdown blockquote > :first-child { margin-top: 0; }
 .readme-markdown blockquote > :last-child { margin-bottom: 0; }
+.readme-markdown .markdown-alert { margin: 1rem 0; padding: .5rem 1rem; border-left: .25rem solid var(--alert-color); color: var(--ink); }
+.readme-markdown .markdown-alert-note { --alert-color: #0969da; }
+.readme-markdown .markdown-alert-tip { --alert-color: #1a7f37; }
+.readme-markdown .markdown-alert-important { --alert-color: #8250df; }
+.readme-markdown .markdown-alert-warning { --alert-color: #9a6700; }
+.readme-markdown .markdown-alert-caution { --alert-color: #d1242f; }
+.readme-markdown .markdown-alert > :first-child { margin-top: 0; }
+.readme-markdown .markdown-alert > :last-child { margin-bottom: 0; }
+.readme-markdown .markdown-alert-title { display: flex; align-items: center; gap: .5rem; margin: 0 0 1rem; color: var(--alert-color); font-weight: 600; }
+.readme-markdown .markdown-alert-title svg { flex-shrink: 0; }
 .readme-markdown code { font: .875rem/1.7 var(--mono); padding: .125rem .3rem; background: var(--readme-selected); border-radius: 3px; }
 .readme-markdown pre { max-width: 100%; overflow: auto; margin: 1.5rem 0; padding: 1.25rem; background: var(--readme-selected); border-radius: 4px; }
 .readme-markdown pre code { padding: 0; background: none; white-space: pre; }

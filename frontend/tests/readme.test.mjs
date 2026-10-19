@@ -11,6 +11,7 @@ test('README sources follow the requested order, including the organization prof
   assert.deepEqual(readmeChapters.map(c => c.repository), ['.github', 'semantic-review-extraction-experiment', 'meta-search', 'review-catalog-platform']);
   assert.equal(overview.sourceUrl, 'https://raw.githubusercontent.com/subjective-experience-shopping-platform/.github/refs/heads/main/profile/README.md');
   for (const chapter of readmeChapters) {
+    assert.equal(chapter.repositoryUrl, `https://github.com/subjective-experience-shopping-platform/${chapter.repository}`);
     assert.equal(readmeLocation(readmeHref(chapter)).chapter, chapter);
     assert.equal(appPage(readmeHref(chapter)), 'home');
   }

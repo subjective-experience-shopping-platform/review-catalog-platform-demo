@@ -7,6 +7,7 @@ import rehypeSlug from "rehype-slug";
 import { ArrowUpRight } from "./icons";
 import { resolveReadmeImage, resolveReadmeLink, type ReadmeChapter } from "./readme";
 import { ReadmeMermaid } from "./ReadmeMermaid";
+import { rehypeReadmeAlerts } from "./readmeAlerts";
 import type { ReadmePreviewImage } from "./ReadmeImagePreview";
 
 type Props = {
@@ -45,7 +46,7 @@ export function ReadmeMarkdown({ markdown, chapter, currentUrl, onPreview }: Pro
 
   return <ReactMarkdown
     remarkPlugins={[remarkGfm]}
-    rehypePlugins={[rehypeRaw, rehypeSanitize, [rehypeSlug, { prefix: "readme-" }]]}
+    rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeReadmeAlerts, [rehypeSlug, { prefix: "readme-" }]]}
     components={components}
   >{markdown}</ReactMarkdown>;
 }

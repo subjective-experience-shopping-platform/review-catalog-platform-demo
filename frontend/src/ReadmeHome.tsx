@@ -96,7 +96,7 @@ export function ReadmeHome() {
       </aside>
       <section className="readme-reader" aria-label={chapter.title}>
         <article ref={article} tabIndex={-1} className="readme-markdown" aria-label={`${chapter.title} README`} aria-busy={!markdown && !error}>
-          <a className="readme-github-link" href={chapter.githubUrl} target="_blank" rel="noreferrer" aria-label={`${chapter.title} GitHub 원문 (새 탭)`} title="GitHub 원문 보기">
+          <a className="readme-github-link" href={chapter.repositoryUrl} target="_blank" rel="noreferrer" aria-label={`${chapter.title} GitHub 저장소 (새 탭)`} title="GitHub 저장소 보기">
             <img src={`${import.meta.env.BASE_URL}github-open-link.png`} alt="" width={32} height={32} />
           </a>
           <div className="readme-content">

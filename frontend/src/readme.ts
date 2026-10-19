@@ -9,6 +9,7 @@ export const readmeChapters = [
 ].map(chapter => ({
   ...chapter,
   sourceUrl: `https://raw.githubusercontent.com/${organization}/${chapter.repository}/refs/heads/main/${chapter.path}`,
+  repositoryUrl: `https://github.com/${organization}/${chapter.repository}`,
   githubUrl: `https://github.com/${organization}/${chapter.repository}/blob/main/${chapter.path}`,
 }));
 

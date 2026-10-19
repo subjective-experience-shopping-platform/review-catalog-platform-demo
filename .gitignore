@@ -14,3 +14,7 @@ output/
 .playwright-cli/
 
 data/*.building
+
+# Local coding-agent instructions
+AGENTS.md
+AGNETS.md
