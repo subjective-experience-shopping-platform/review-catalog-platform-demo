@@ -38,10 +38,16 @@ type Message = {
   conditions?: Condition[];
 };
 const examples = [
-  "27인치 QHD 모니터 중 30만 원 이하로 찾아줘",
-  "빛샘이 적다는 리뷰가 있는 모니터를 비교해줘",
-  "30만 원 이하에 무료배송인 판매처가 있는 모니터를 찾아줘",
+  { type: "사양", text: "크기가 27인치 이상이면서 QHD 화질인 모니터를 찾아줘" },
+  { type: "경험", text: "빛샘이 적다는 리뷰가 있는 모니터를 비교해줘" },
+  { type: "판매", text: "30만 원 이하에 무료배송인 판매처가 있는 모니터를 찾아줘" },
+  { type: "종합", text: "화질이 선명한 30만 원 이하 27인치 QHD 모니터를 추천해 줘" },
 ];
+const conditionClasses: Record<Condition["type"], string> = {
+  객관: "objective",
+  체감: "experience",
+  판매: "sales",
+};
 function Markdown({ text }: { text: string }) {
   return (
     <div className="prose">
@@ -57,7 +63,7 @@ function Conditions({ items }: { items: Condition[] }) {
         const method = c.method || "filter";
         const Icon = method === "search" ? Search : method === "sort" ? ArrowDownUp : ListFilter;
         const label = method === "search" ? "검색" : method === "sort" ? "정렬" : "필터링";
-        return <span key={i} className={"condition " + (c.type === "체감" ? "experience" : "")}>
+        return <span key={i} className={"condition " + conditionClasses[c.type]}>
           <Icon size={12} aria-label={label} role="img"><title>{label}</title></Icon>
           <b>{c.type}:</b><span>{c.value}</span>
         </span>;
@@ -286,9 +292,9 @@ function App() {
           <aside className="chat-sidebar">
             <div className="eyebrow">SHOPPING AGENT</div>
             <h2>
-              나에게 맞는
+              사용자 맞춤
               <br />
-              조건부터.
+              쇼핑 Agent
             </h2>
             <button
               className="new-chat"
@@ -298,26 +304,24 @@ function App() {
             </button>
             <div className="sidebar-block">
               <span className="tiny-label">현재 적용 조건</span>
-              {session?.applied_conditions.length ? (
-                <Conditions items={session.applied_conditions} />
-              ) : (
-                <p>
-                  원하는 조건을 말하면
-                  <br />
-                  이곳에 정리해 드립니다.
-                </p>
-              )}
+              <div className="sidebar-conditions" tabIndex={0} role="region" aria-label="현재 적용 조건 목록">
+                {session?.applied_conditions.length ? (
+                  <Conditions items={session.applied_conditions} />
+                ) : (
+                  <p>
+                    원하는 조건을 말하면
+                    <br />
+                    이곳에 정리해 드립니다.
+                  </p>
+                )}
+              </div>
             </div>
             <div className="sidebar-bottom">
               <ShieldCheck size={18} />
               <b>한 번에 하나의 대화</b>
               <p>
                 새 대화를 시작하면 화면의 기존 내용이 지워집니다. 페이지를 닫거나
-                새로고침하면 화면에서 복구할 수 없습니다. 서버 보안 기록은 삭제되지 않습니다.
-              </p>
-              <p>
-                제출한 대화와 답변은 보안 점검을 위해 비공개 저장소에 보관되며
-                90일 후 자동 삭제 대상이 됩니다. 개인정보나 비밀번호를 입력하지 마세요.
+                새로고침하면 화면에서 복구할 수 없습니다.
               </p>
               <details>
                 <summary>
@@ -325,9 +329,8 @@ function App() {
                 </summary>
                 <p className="mobile-policy">새 대화를 시작하면 화면의 기존 내용이 지워지며, 페이지를 닫거나 새로고침하면 복구할 수 없습니다. 제출한 대화와 답변은 보안 점검을 위해 비공개 저장소에 보관하고 90일 후 자동 삭제 대상이 됩니다. 새 대화는 서버 기록을 삭제하지 않습니다. 개인정보나 비밀번호를 입력하지 마세요.</p>
                 <p>
-                  보안 기록은 운영자만 조회하며 카탈로그에 반영하지 않습니다. 이전 문맥 연결에는
-                  OpenAI의 응답 저장과 응답 ID를 사용합니다. 새 대화에서는 이전
-                  ID와 조건을 전송하지 않습니다.
+                  보안 기록은 운영자만 조회하며 카탈로그에 반영하지 않으며 제출한 대화와 답변은 보안 점검을 위해 비공개 저장소에 보관되며
+                  90일 후 자동 삭제 대상이 됩니다. 개인정보나 비밀번호를 입력하지 않도록 주의하세요.
                 </p>
               </details>
             </div>
@@ -343,21 +346,22 @@ function App() {
             <div className="conversation" aria-live="polite">
               {messages.length === 0 ? (
                 <div className="chat-empty">
-                  <div className="eyebrow">01 / 모니터 탐색</div>
+                  <div className="eyebrow">Meta search MCP</div>
                   <h1>어떤 경험을 찾고 있나요?</h1>
                   <p>
                     필요한 사양이나 사용하면서 중요하게 느끼는 점을 알려주세요.
                   </p>
                   <div className="suggestions">
-                    {examples.map((t) => (
+                    {examples.map(({ type, text }) => (
                       <button
-                        key={t}
+                        key={type}
+                        className={type === "종합" ? "suggestion-combined" : undefined}
                         onClick={() => {
-                          setInput(t);
+                          setInput(text);
                           textarea.current?.focus();
                         }}
                       >
-                        <span className="suggestion-type">{["사양", "경험", "판매"][examples.indexOf(t)]}</span><span>{t}</span>
+                        <span className="suggestion-type">{type}</span><span>{text}</span>
                         <ArrowUpRight size={16} />
                       </button>
                     ))}
@@ -370,7 +374,7 @@ function App() {
                 messages.map((m, i) => (
                   <article key={i} className={"message " + m.role}>
                     <div className="message-author">
-                      {m.role === "user" ? "나" : "REVIEW CATALOG"}
+                      {m.role === "user" ? "나" : "APPLIED FILTERS"}
                     </div>
                     {m.conditions && <Conditions items={m.conditions} />}
                     <Markdown text={m.text} />
@@ -591,22 +595,22 @@ function App() {
         </dialog>
       )}
       {resetOpen && (
-          <dialog ref={resetDialog} className="modal" aria-labelledby="reset-title" onCancel={() => setResetOpen(false)}>
-            <RotateCcw size={25} />
-            <h2 id="reset-title">새 대화를 시작할까요?</h2>
-            <p>
-              화면의 대화 내용과 적용 조건이 지워져 복구할 수 없습니다.
-              서버 보안 기록은 삭제되지 않으며 90일 보관 정책을 따릅니다.
-            </p>
-            <div>
-              <button className="secondary" onClick={() => setResetOpen(false)}>
-                취소
-              </button>
-              <button className="primary" onClick={reset} autoFocus>
-                지우고 시작
-              </button>
-            </div>
-          </dialog>
+        <dialog ref={resetDialog} className="modal" aria-labelledby="reset-title" onCancel={() => setResetOpen(false)}>
+          <RotateCcw size={25} />
+          <h2 id="reset-title">새 대화를 시작할까요?</h2>
+          <p>
+            화면의 대화 내용과 적용 조건이 지워져 복구할 수 없습니다.
+            서버 보안 기록은 삭제되지 않으며 90일 보관 정책을 따릅니다.
+          </p>
+          <div>
+            <button className="secondary" onClick={() => setResetOpen(false)}>
+              취소
+            </button>
+            <button className="primary" onClick={reset} autoFocus>
+              지우고 시작
+            </button>
+          </div>
+        </dialog>
       )}
     </>
   );
