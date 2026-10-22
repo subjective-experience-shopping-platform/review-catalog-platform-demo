@@ -105,7 +105,6 @@ function App() {
   useEffect(() => { if (reportResetOpen) reportResetDialog.current?.showModal(); }, [reportResetOpen]);
   useEffect(() => {
     if (page === "chat" && !noticeAccepted) notice.current?.showModal();
-    else if (page === "chat" && noticeAccepted) textarea.current?.focus();
   }, [page, noticeAccepted]);
   useEffect(() => {
     const fn = () => setPage(appPage(location.hash));
@@ -295,7 +294,7 @@ function App() {
         </nav>
         <a
           className="github"
-          href="https://github.com/subjective-experience-shopping-platform/review-catalog-platform-demo"
+          href="https://github.com/subjective-experience-shopping-platform"
           target="_blank"
           rel="noreferrer"
         >
@@ -373,19 +372,13 @@ function App() {
                       <button
                         key={type}
                         className={type === "종합" ? "suggestion-combined" : undefined}
-                        onClick={() => {
-                          setInput(text);
-                          textarea.current?.focus();
-                        }}
+                        onClick={() => void send(text)}
                       >
                         <span className="suggestion-type">{type}</span><span>{text}</span>
                         <ArrowUpRight size={16} />
                       </button>
                     ))}
                   </div>
-                  <p className="small-muted">
-                    예시 질문은 실제 검색 전에는 조건으로 적용되지 않습니다.
-                  </p>
                 </div>
               ) : (
                 messages.map((m, i) => (
@@ -498,20 +491,23 @@ function App() {
                 <span>REVIEW NOTE</span>
               </div>
               <label htmlFor="product">사용한 상품</label>
-              <select
-                id="product"
-                value={product}
-                onChange={(e) => setProduct(e.target.value)}
-                disabled={reportBusy || !data}
-                required
-              >
-                {!data && <option value="">{loadError ? "카탈로그 연결을 확인해 주세요" : "상품을 불러오는 중…"}</option>}
-                {data?.products.map((p) => (
-                  <option key={p.product_id} value={p.product_id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+              <div className="product-select">
+                <select
+                  id="product"
+                  value={product}
+                  onChange={(e) => setProduct(e.target.value)}
+                  disabled={reportBusy || !data}
+                  required
+                >
+                  {!data && <option value="">{loadError ? "카탈로그 연결을 확인해 주세요" : "상품을 불러오는 중…"}</option>}
+                  {data?.products.map((p) => (
+                    <option key={p.product_id} value={p.product_id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <span className="product-select-arrow" aria-hidden="true"><ChevronDown size={16} /></span>
+              </div>
               <label htmlFor="review">
                 나의 사용 경험 <span>최대 8,000자</span>
               </label>

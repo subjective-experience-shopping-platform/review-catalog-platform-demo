@@ -6,6 +6,8 @@
   --readme-error: #9f2f2d;
   --readme-link: #0969da;
   --readme-link-hover: #0550ae;
+  --readme-toc-ink: #787872;
+  --readme-toc-rule: #d2d1cb;
   display: grid;
   grid-template-columns: 15rem minmax(0, 1fr);
   align-items: start;
@@ -15,7 +17,7 @@
   padding: 3rem 3rem 5rem;
   color: var(--ink);
 }
-.readme-index { position: sticky; top: 2rem; min-width: 0; }
+.readme-index { position: sticky; top: 2rem; min-width: 0; max-height: calc(100dvh - 4rem); overflow-y: auto; overscroll-behavior-y: contain; scrollbar-gutter: stable; }
 .readme-index h2 { margin: 0 0 1.5rem; font-size: 1.25rem; font-weight: 600; letter-spacing: -.03em; }
 .readme-chapters { display: grid; align-self: auto; gap: .375rem; }
 .readme-chapters a { display: block; height: auto; min-height: 4.75rem; padding: .875rem 1rem; border-radius: 4px; }
@@ -24,7 +26,14 @@
 .readme-chapters a:hover { background: var(--readme-selected); }
 .readme-chapters a[aria-current="page"] { background: var(--readme-selected); }
 .readme-chapters a[aria-current="page"] strong { font-weight: 600; }
-.readme-index-note { margin-top: 2rem; padding: 0 1rem; font-size: .8125rem; line-height: 1.8; color: var(--muted); }
+.readme-toc { margin-top: 3rem; }
+.readme-toc nav { display: block; }
+.readme-toc ul { list-style: none; margin: 0; padding: 0; }
+.readme-toc li { margin: 0; }
+.readme-toc a { display: block; height: auto; min-height: 0; padding: .125rem .75rem; font-size: .8125rem; line-height: 1.6; color: var(--readme-toc-ink); text-decoration: underline; text-decoration-color: var(--readme-toc-rule); text-decoration-thickness: 1px; text-underline-offset: .22em; overflow-wrap: anywhere; border-radius: 4px; }
+.readme-toc a:hover, .readme-toc a[aria-current="location"] { background: var(--readme-selected); color: var(--ink); }
+.readme-toc-level-3 { padding-left: 1rem; }
+.readme-toc-level-4 { padding-left: 2rem; }
 .readme-reader { min-width: 0; }
 .readme-markdown { position: relative; padding: clamp(1.5rem, 3.6vw, 3.5rem); background: var(--readme-surface); min-height: 24rem; font-size: 1rem; line-height: 1.85; overflow-wrap: anywhere; }
 .readme-markdown:focus { outline: none; }
@@ -97,6 +106,8 @@
 .readme-pagination a:hover { background: var(--readme-surface); }
 .readme-pagination span { font-size: .8125rem; color: var(--muted); }
 .readme-pagination strong { display: block; font-size: 1.25rem; font-weight: 500; color: var(--ink); margin-top: .375rem; letter-spacing: -.03em; }
+.readme-pagination .readme-report { background: #dfe6d8; }
+.readme-pagination .readme-report:hover { background: #d1dcc7; }
 .readme-pagination .readme-next { grid-column: 2; }
 .readme-pagination .readme-previous { flex-direction: row-reverse; text-align: right; }
 .readme-previous svg { transform: rotate(180deg); }
@@ -111,7 +122,9 @@
 }
 @media (max-width: 760px) {
   .readme-home { display: block; padding: 1.75rem 1.375rem 3rem; }
-  .readme-index { position: static; margin-bottom: 2rem; }
+  .readme-index { top: 0; z-index: 2; margin-bottom: 2rem; padding: .75rem 0 1rem; max-height: min(45dvh, 24rem); background: var(--paper); }
+  .readme-toc { margin-top: 1.5rem; }
+  .readme-toc h2 { font-size: 1rem; }
   .readme-index h2 { margin-bottom: 1rem; }
   .readme-chapters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
   .readme-chapters a { min-height: 3.5rem; display: flex; align-items: center; padding: .75rem; background: var(--readme-surface); }

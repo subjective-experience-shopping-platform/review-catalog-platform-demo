@@ -6,6 +6,7 @@ import { ReadmeMarkdown } from "./ReadmeMarkdown";
 import "./readme.css";
 
 const documents = new Map<string, string>();
+type Heading = { id: string; title: string; level: number };
 
 export function ReadmeHome() {
   const [route, setRoute] = useState(() => readmeLocation(location.hash));
@@ -14,6 +15,8 @@ export function ReadmeHome() {
   const [attempt, setAttempt] = useState(0);
   const [preview, setPreview] = useState<ReadmePreviewImage | null>(null);
   const article = useRef<HTMLElement>(null);
+  const sidebar = useRef<HTMLElement>(null);
+  const [contents, setContents] = useState<{ chapterId: string; headings: Heading[] }>({ chapterId: "", headings: [] });
   const { chapter, section } = route;
   const index = readmeChapters.indexOf(chapter);
   const markdown = document?.id === chapter.id ? document.text : "";
@@ -62,14 +65,27 @@ export function ReadmeHome() {
     };
   }, [chapter, attempt]);
 
+  // Read the sanitized, slugged headings from the same render as the article.
+  // This also supports HTML headings and duplicate titles without a second parser.
   useEffect(() => {
-    if (!markdown) return;
-    if (section) {
-      const target = window.document.getElementById(`readme-${section}`)
-        ?? window.document.getElementById(`user-content-${section}`);
-      target?.scrollIntoView({ block: "start" });
-    }
-  }, [markdown, section]);
+    const headings = Array.from(article.current?.querySelectorAll<HTMLElement>(".readme-content :is(h2, h3, h4)[id]") ?? [])
+      .map(heading => ({ id: heading.id, title: heading.textContent?.trim() || "", level: Number(heading.tagName.slice(1)) }))
+      .filter(heading => heading.title);
+    setContents({ chapterId: chapter.id, headings });
+  }, [markdown, chapter.id]);
+
+  function scrollToSection(id: string) {
+    const target = window.document.getElementById(`readme-${id}`)
+      ?? window.document.getElementById(`user-content-${id}`)
+      ?? window.document.getElementById(id);
+    if (!target) return;
+    const offset = window.matchMedia("(max-width: 760px)").matches ? (sidebar.current?.getBoundingClientRect().height ?? 0) + 16 : 32;
+    window.scrollTo({ top: window.scrollY + target.getBoundingClientRect().top - offset, behavior: "instant" });
+  }
+
+  useEffect(() => {
+    if (markdown && section && contents.chapterId === chapter.id) scrollToSection(section);
+  }, [markdown, section, contents, chapter.id]);
 
   function selectChapter() {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -83,8 +99,8 @@ export function ReadmeHome() {
 
   return (
     <main id="main-content" tabIndex={-1} className="readme-home">
-      <aside className="readme-index" aria-label="프로젝트 문서">
-        <h2>프로젝트 문서 목차</h2>
+      <aside ref={sidebar} className="readme-index" aria-label="프로젝트 문서">
+        <h2>프로젝트 문서</h2>
         <nav className="readme-chapters" aria-label="README 선택">
           {readmeChapters.map(item => (
             <a key={item.id} href={readmeHref(item)} aria-current={chapter.id === item.id ? "page" : undefined} onClick={selectChapter}>
@@ -93,6 +109,23 @@ export function ReadmeHome() {
             </a>
           ))}
         </nav>
+        <div className="readme-toc">
+          <h2 id="readme-toc-title">문서 목차</h2>
+          <nav aria-labelledby="readme-toc-title">
+            <ul>
+              {(contents.chapterId === chapter.id && !error ? contents.headings : []).map(heading => {
+                const sectionId = heading.id.replace(/^readme-/, "");
+                return <li key={heading.id} className={`readme-toc-level-${heading.level}`}>
+                  <a href={readmeHref(chapter, sectionId)} aria-current={section === sectionId ? "location" : undefined} onClick={event => {
+                    event.preventDefault();
+                    location.hash = readmeHref(chapter, sectionId);
+                    scrollToSection(sectionId);
+                  }}>{heading.title}</a>
+                </li>;
+              })}
+            </ul>
+          </nav>
+        </div>
       </aside>
       <section className="readme-reader" aria-label={chapter.title}>
         <article ref={article} tabIndex={-1} className="readme-markdown" aria-label={`${chapter.title} README`} aria-busy={!markdown && !error}>
@@ -118,7 +151,8 @@ export function ReadmeHome() {
         </article>
         <nav className="readme-pagination" aria-label="이전·다음 README">
           {previous && <a href={readmeHref(previous)} className="readme-previous" onClick={selectChapter}><span>이전 문서<strong>{previous.title}</strong></span><ArrowRight size={24} /></a>}
-          {next && <a href={readmeHref(next)} className="readme-next" onClick={selectChapter}><span>다음 문서<strong>{next.title}</strong></span><ArrowRight size={24} /></a>}
+          {next ? <a href={readmeHref(next)} className="readme-next" onClick={selectChapter}><span>다음 문서<strong>{next.title}</strong></span><ArrowRight size={24} /></a>
+            : <a href="#report" className="readme-next readme-report"><span>직접 사용해 보기<strong>리뷰 보고서</strong></span><ArrowRight size={24} /></a>}
         </nav>
       </section>
       {preview && <ReadmeImagePreview image={preview} onClose={() => setPreview(null)} />}
