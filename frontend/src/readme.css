@@ -6,7 +6,7 @@
   --readme-error: #9f2f2d;
   --readme-link: #0969da;
   --readme-link-hover: #0550ae;
-  --readme-toc-ink: #787872;
+  --readme-toc-ink: #707070;
   --readme-toc-rule: #d2d1cb;
   display: grid;
   grid-template-columns: 15rem minmax(0, 1fr);
